@@ -56,7 +56,7 @@ Index.getInitialProps = async (ctx) => {
     const { place } = ctx.query;
     if (!place) return {};
     const placesData = await fetch(
-      `http://localhost:3000/api/place?place_id=${place}`
+      `https://coventry-merchants.vercel.app/api/place?place_id=${place}`
     ).then((response) => response.json());
 
     return { placesData: placesData?.result };

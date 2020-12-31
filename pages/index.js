@@ -1,65 +1,68 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React from "react";
 
-export default function Home() {
+const Index = ({ placesData }) => {
+  if (!placesData) return null;
+  const {
+    address,
+    name,
+    price_level,
+    opening_hours,
+    rating = 0,
+    website,
+    user_ratings_total,
+  } = placesData;
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <h1 style={{ marginBottom: 0 }}>{name}</h1>
+        <h3 style={{ marginTop: 0 }}>{address}</h3>
+      </div>
+      <p>
+        Rating:{" "}
+        <strong>
+          {Array(Math.floor(rating)).fill("⭐")}
+          {rating - Math.floor(rating) >= 0.5 ? "✨" : ""}
+        </strong>
+      </p>
+      <p>
+        Total Ratings: <strong>{user_ratings_total}</strong>
+      </p>
+      <p>
+        Price: <strong>{Array(price_level).fill("$")}</strong>
+      </p>
+      {opening_hours?.weekday_text ? (
+        <ul style={{ listStyle: "none" }}>
+          {opening_hours?.weekday_text.map((hours, key) => (
+            <li key={key}>{hours}</li>
+          ))}
+        </ul>
+      ) : null}
+      <a href={website} target="_blank">
+        Website 🌎
+      </a>
     </div>
-  )
-}
+  );
+};
+
+Index.getInitialProps = async (ctx) => {
+  try {
+    const { place } = ctx.query;
+    if (!place) return {};
+    const placesData = await fetch(
+      `http://localhost:3000/api/place?place_id=${place}`
+    ).then((response) => response.json());
+
+    return { placesData: placesData?.result };
+  } catch (error) {
+    console.log(error);
+    return { placesData: {} };
+  }
+};
+export default Index;
